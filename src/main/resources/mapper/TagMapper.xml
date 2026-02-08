@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.blog.server.mapper.TagMapper">
+    <select id="tagWall" resultType="com.my.blog.pojo.vo.user.UserTagWallVO">
+        select tag.id as tag_id, tag.name as tag_name, count(0) as articleCount
+        from `tb_tag` tag
+                 join `tb_article_tag` article_tag on tag.id = article_tag.tag_id
+                 join `tb_article` article on article_tag.article_id = article.id
+        where article.status = 1
+          and tag.status = 0
+        group by tag.id
+    </select>
+</mapper>

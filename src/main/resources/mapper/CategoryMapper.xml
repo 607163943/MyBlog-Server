@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.blog.server.mapper.CategoryMapper">
+    <select id="getHotCategoryTop5" resultType="com.my.blog.pojo.vo.user.UserHotCategoryVO">
+        select category_id, category.name category_name, count(0) articleCount
+        from `tb_category` category
+                 join `tb_article` article on category.id = article.category_id
+        where article.status = 1
+        group by article.category_id
+        order by articleCount desc
+        limit 5
+    </select>
+    <select id="pageQuery" resultType="com.my.blog.pojo.vo.user.UserCategoryVO">
+        select category.id, category.name, category.cover, count(0) articleCount
+        from `tb_category` category
+                 join `tb_article` article on category.id = article.category_id
+        where category.status = 0
+          and article.status = 1
+        group by category.id, category.sort
+        order by category.sort desc
+    </select>
+</mapper>

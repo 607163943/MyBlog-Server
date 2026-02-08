@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.blog.server.mapper.ArticleMapper">
+
+    <select id="trend7Day" resultType="com.my.blog.pojo.vo.admin.TrendChartData">
+        select count(0) count, date(create_time) date
+        from tb_article
+        where create_time>= date_sub(now(),interval 7 day )
+        group by date(create_time)
+    </select>
+    <select id="categoryArticleRatio" resultType="com.my.blog.pojo.vo.admin.RatioChartData">
+        select count(0) value, category.name
+        from tb_article article
+                 join tb_category category on article.category_id = category.id
+        group by article.category_id
+        order by value desc
+        limit 10
+    </select>
+    <select id="countArticle7Day" resultType="long">
+        select count(0)
+        from tb_article
+        where create_time >= date_sub(now(),interval 7 day )
+        <if test="status!=null">
+            and status=#{status}
+        </if>
+    </select>
+    <select id="countGroupByStatus" resultType="com.my.blog.pojo.vo.admin.RatioChartData">
+        select count(0)   value,
+               case
+                   when status = 0 then '草稿'
+                   when status = 1 then '发布'
+                   when status = 2 then '下架'
+                   end as name
+        from tb_article
+        group by status;
+    </select>
+    <select id="countThisYearAddArticleActive" resultType="com.my.blog.pojo.vo.admin.CalendarChartData">
+        select date(create_time) date, count(0) count
+        from `tb_article`
+        where date(create_time) >= date_format(curdate(), '%Y-01-01')
+        group by date(create_time);
+    </select>
+</mapper>
