@@ -1,7 +1,6 @@
 package com.my.blog.server.security;
 
 import com.baomidou.mybatisplus.extension.toolkit.Db;
-import com.github.benmanes.caffeine.cache.Cache;
 import com.my.blog.common.enums.ExceptionEnums;
 import com.my.blog.common.exception.admin.AdminUserLoginException;
 import com.my.blog.common.utils.JWTUtils;
@@ -19,9 +18,6 @@ import javax.annotation.Resource;
 public class LoginRealm extends AuthenticatingRealm {
     @Resource
     private JWTUtils jwtUtils;
-
-    @Resource
-    private Cache<String,String> tokenCache;
     @Override
     public boolean supports(AuthenticationToken token) {
         // 只处理自定义认证令牌
@@ -38,15 +34,6 @@ public class LoginRealm extends AuthenticatingRealm {
 
         if(userId==null) {
             throw new AdminUserLoginException(ExceptionEnums.ADMIN_USER_NOT_LOGIN);
-        }
-
-        // redis令牌再校验
-        String cacheToken = tokenCache.getIfPresent("user:token:" + userId);
-        if(cacheToken==null) {
-            throw new AdminUserLoginException(ExceptionEnums.ADMIN_USER_LOGIN_TIMEOUT);
-        }
-        if(!cacheToken.equals(token)) {
-            throw new AdminUserLoginException(ExceptionEnums.ADMIN_USER_LOGIN_TIMEOUT);
         }
 
         // 获取用户数据

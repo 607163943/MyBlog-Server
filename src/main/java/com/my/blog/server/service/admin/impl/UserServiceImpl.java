@@ -35,8 +35,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private JWTUtils jwtUtils;
 
-    private final Cache<String,String> tokenCache;
-
     private final Cache<String,String> captchaCache;
 
     /**
@@ -73,9 +71,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 更新用户登陆时间
         user.setLastLoginTime(LocalDateTime.now());
         updateById(user);
-
-        // 令牌存入Redis 1天过期
-        tokenCache.put("user:token:" + user.getId(), token);
 
         return UserLoginVO.builder()
                 .token(token)
@@ -132,11 +127,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      */
     @Override
     public void logout() {
-        // 获取登录用户数据
+        // 获取登出用户数据
         User user = (User) SecurityUtils.getSubject().getPrincipal();
-
-        // 清除缓存中的token
-        tokenCache.invalidate("user:token:" + user.getId());
 
         log.info("用户{},id:{}，登出成功！", user.getUsername(), user.getId());
     }
@@ -201,8 +193,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .update();
 
         log.info("用户{},id:{}，修改密码成功！", user.getUsername(), user.getId());
-
-        // 清除redis token缓存
-        tokenCache.invalidate("user:token:" + user.getId());
     }
 }

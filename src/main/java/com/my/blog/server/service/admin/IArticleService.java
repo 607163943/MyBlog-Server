@@ -63,20 +63,6 @@ public interface IArticleService extends IService<Article> {
      */
     List<RatioChartData> categoryArticleRatio();
 
-    Long countArticle7Day(Integer status);
-
-    /**
-     * 获取文章状态占比
-     * @return 文章状态占比
-     */
-    List<RatioChartData> countGroupByStatus();
-
-    /**
-     * 获取文章活跃数据
-     * @return 文章活跃数据
-     */
-    List<List<Object>> countThisYearAddArticleActive();
-
     /**
      * 删除文章
      * @param id 文章id

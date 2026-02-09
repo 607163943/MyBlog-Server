@@ -10,19 +10,6 @@ import java.time.Duration;
 @Configuration
 public class CaffeineConfig {
     /**
-     * 令牌缓存配置
-     * @return 令牌缓存对象
-     */
-    @Bean
-    public Cache<String,String> tokenCache() {
-        return Caffeine.newBuilder()
-                .maximumSize(10)
-                // 缓存有效期1天
-                .expireAfterWrite(Duration.ofDays(1))
-                .build();
-    }
-
-    /**
      * 验证码缓存配置
      * @return 验证码缓存对象
      */

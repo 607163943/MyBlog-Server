@@ -418,7 +418,24 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     @Override
     public List<TrendChartData> trend7Day() {
-        return baseMapper.trend7Day();
+        List<TrendChartData> trendChartDataList = baseMapper.trend7Day();
+        // 循环中获取7天数据，条件是 是否在当前时间之前，故往后添加一天，保证数据完整
+        LocalDate now = LocalDate.now().plusDays(1);
+        LocalDate start = now.minusDays(7);
+        List<TrendChartData> allTrendChartDataList = new ArrayList<>(7);
+        while (start.isBefore(now)) {
+            TrendChartData chartData = new TrendChartData(0L, start);
+            for (TrendChartData trendChartData : trendChartDataList) {
+                if (trendChartData.getDate().equals(start)) {
+                    chartData.setCount(trendChartData.getCount());
+                    break;
+                }
+            }
+            start = start.plusDays(1);
+
+            allTrendChartDataList.add(chartData);
+        }
+        return allTrendChartDataList;
     }
 
     /**
@@ -429,64 +446,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public List<RatioChartData> categoryArticleRatio() {
         return baseMapper.categoryArticleRatio();
-    }
-
-    /**
-     * 统计文章7天新增数
-     *
-     * @param status 文章状态
-     */
-    @Override
-    public Long countArticle7Day(Integer status) {
-        return baseMapper.countArticle7Day(status);
-    }
-
-    /**
-     * 统计文章状态
-     *
-     * @return 文章状态
-     */
-    @Override
-    public List<RatioChartData> countGroupByStatus() {
-        return baseMapper.countGroupByStatus();
-    }
-
-    /**
-     * 获取文章今年新增活跃度
-     *
-     * @return 文章今年新增活跃度
-     */
-    @Override
-    public List<List<Object>> countThisYearAddArticleActive() {
-        // 统计新增文章活跃度
-        List<CalendarChartData> calendarChartDataList = baseMapper.countThisYearAddArticleActive();
-
-        // 创建今年时间初始列表
-        List<List<Object>> calendarList = new ArrayList<>();
-        // 一年开始
-        LocalDate startYearDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        // 一年结束
-        LocalDate endYearDate = LocalDate.of(LocalDate.now().getYear(), 12, 31);
-        while (startYearDate.isBefore(endYearDate)) {
-            List<Object> calendarListItem = new ArrayList<>(2);
-            calendarListItem.add(startYearDate);
-            calendarListItem.add(0);
-
-            calendarList.add(calendarListItem);
-            startYearDate = startYearDate.plusDays(1);
-        }
-        // 补全末尾项
-        calendarList.add(new ArrayList<>(Arrays.asList(endYearDate, 0)));
-
-        // 补全列表数据
-        for (CalendarChartData calendarChartData : calendarChartDataList) {
-            for (List<Object> calendarListItem : calendarList) {
-                if (calendarListItem.get(0).equals(calendarChartData.getDate())) {
-                    calendarListItem.set(1, calendarChartData.getCount());
-                }
-            }
-        }
-        return calendarList;
     }
 
     /**
