@@ -30,12 +30,6 @@ public interface ITagService extends IService<Tag> {
     void updateTag(AdminTagDTO adminTagDTO);
 
     /**
-     * 修改标签状态
-     * @param id 标签id
-     */
-    void updateStatus(Long id);
-
-    /**
      * 删除标签
      * @param id 标签id
      */
@@ -46,4 +40,11 @@ public interface ITagService extends IService<Tag> {
      * @param ids 标签id集合
      */
     void deleteByIds(List<Long> ids);
+
+    /**
+     * 根据文章id查询标签下文章集合
+      * @param articleId 文章id
+     * @return 标签集合
+     */
+    List<AdminTagPageQueryVO> pageQueryTag(Long articleId);
 }

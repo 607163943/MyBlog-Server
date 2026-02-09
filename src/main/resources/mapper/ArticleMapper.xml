@@ -5,7 +5,7 @@
     <select id="trend7Day" resultType="com.my.blog.pojo.vo.admin.TrendChartData">
         select count(0) count, date(create_time) date
         from tb_article
-        where create_time>= date_sub(now(),interval 7 day )
+        where create_time >= date_sub(now(), interval 7 day)
         group by date(create_time)
     </select>
     <select id="categoryArticleRatio" resultType="com.my.blog.pojo.vo.admin.RatioChartData">
@@ -16,28 +16,90 @@
         order by value desc
         limit 10
     </select>
-    <select id="countArticle7Day" resultType="long">
-        select count(0)
-        from tb_article
-        where create_time >= date_sub(now(),interval 7 day )
-        <if test="status!=null">
-            and status=#{status}
-        </if>
+
+    <resultMap id="AdminArticleWithTagsMap" type="com.my.blog.pojo.vo.admin.AdminArticlePageQueryVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="status" column="status"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="updateTime" column="update_time"/>
+
+        <collection property="tags" ofType="com.my.blog.pojo.vo.admin.AdminTagPageQueryVO"
+                    select="com.my.blog.server.mapper.TagMapper.pageQueryTag" column="id">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="status" column="status"/>
+        </collection>
+    </resultMap>
+    <select id="pageQuery" resultMap="AdminArticleWithTagsMap">
+        select article.id,
+        article.title,
+        article.status,
+        article.category_id,
+        article.update_time,
+        category.name category_name
+        from tb_article article
+        left join tb_category category on article.category_id = category.id
+        <where>
+            <if test="articlePageQueryDTO.title != null and articlePageQueryDTO.title != ''">
+                and article.title like concat('%', #{articlePageQueryDTO.title}, '%')
+            </if>
+            <if test="articlePageQueryDTO.status!=null">
+                and article.status = #{articlePageQueryDTO.status}
+            </if>
+            <if test="articlePageQueryDTO.categoryId!=null">
+                and article.category_id = #{articlePageQueryDTO.categoryId}
+            </if>
+            <if test="articleIds!=null and !articleIds.empty">
+                and article.id in
+                <foreach item="id" collection="articleIds" separator="," close=")" open="(" index="">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
     </select>
-    <select id="countGroupByStatus" resultType="com.my.blog.pojo.vo.admin.RatioChartData">
-        select count(0)   value,
-               case
-                   when status = 0 then '草稿'
-                   when status = 1 then '发布'
-                   when status = 2 then '下架'
-                   end as name
-        from tb_article
-        group by status;
-    </select>
-    <select id="countThisYearAddArticleActive" resultType="com.my.blog.pojo.vo.admin.CalendarChartData">
-        select date(create_time) date, count(0) count
-        from `tb_article`
-        where date(create_time) >= date_format(curdate(), '%Y-01-01')
-        group by date(create_time);
+
+    <resultMap id="UserArticleWithTagsMap" type="com.my.blog.pojo.vo.user.UserArticlePageQueryVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="summary" column="summary"/>
+        <result property="status" column="status"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="publishTime" column="publish_time"/>
+
+        <collection property="tags" ofType="com.my.blog.pojo.vo.admin.AdminTagPageQueryVO"
+                    select="com.my.blog.server.mapper.TagMapper.pageQueryTag" column="id">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="status" column="status"/>
+        </collection>
+    </resultMap>
+    <select id="userPageQuery" resultMap="UserArticleWithTagsMap">
+        select article.id,
+        article.title,
+        article.summary,
+        article.status,
+        article.category_id,
+        article.update_time,
+        category.name category_name
+        from tb_article article
+        left join tb_category category on article.category_id = category.id
+        <where>
+            article.status = 1
+            <if test="userArticlePageQueryDTO.keyword != null and userArticlePageQueryDTO.keyword != ''">
+                and article.title like concat('%', #{userArticlePageQueryDTO.keyword}, '%')
+            </if>
+            <if test="userArticlePageQueryDTO.categoryId!=null">
+                and article.category_id = #{userArticlePageQueryDTO.categoryId}
+            </if>
+            <if test="articleIds!=null and !articleIds.empty">
+                and article.id in
+                <foreach item="id" collection="articleIds" separator="," close=")" open="(" index="">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
     </select>
 </mapper>

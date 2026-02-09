@@ -16,6 +16,4 @@ import lombok.NoArgsConstructor;
 public class AdminTagPageQueryDTO extends PageQueryDTO {
     @ApiModelProperty("标签名称")
     private String name;
-    @ApiModelProperty("标签状态")
-    private Integer status;
 }

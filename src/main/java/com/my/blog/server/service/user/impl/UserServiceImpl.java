@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.my.blog.common.constants.ArticleStatus;
 import com.my.blog.common.constants.CategoryStatus;
-import com.my.blog.common.constants.TagStatus;
 import com.my.blog.pojo.po.Article;
 import com.my.blog.pojo.po.Category;
 import com.my.blog.pojo.po.Tag;
@@ -32,7 +31,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                 .count();
 
         Long tagCount = Db.lambdaQuery(Tag.class)
-                .eq(Tag::getStatus, TagStatus.ENABLE)
                 .count();
         return UserUserCountChartCardVO.builder()
                 .articleCount(articleCount)

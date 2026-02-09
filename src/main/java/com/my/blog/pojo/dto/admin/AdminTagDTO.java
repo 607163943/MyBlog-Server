@@ -22,8 +22,4 @@ public class AdminTagDTO {
     @ApiModelProperty("标签名称")
     @NotEmpty(message = "标签名称不能为空")
     private String name;
-
-    @ApiModelProperty("标签状态")
-    @NotNull(message = "标签状态不能为空")
-    private Integer status;
 }

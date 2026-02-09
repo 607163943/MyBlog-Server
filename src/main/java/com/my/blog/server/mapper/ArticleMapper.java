@@ -1,10 +1,14 @@
 package com.my.blog.server.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.my.blog.pojo.dto.ArticlePageQueryDTO;
+import com.my.blog.pojo.dto.user.UserArticlePageQueryDTO;
 import com.my.blog.pojo.po.Article;
-import com.my.blog.pojo.vo.admin.CalendarChartData;
+import com.my.blog.pojo.vo.admin.AdminArticlePageQueryVO;
 import com.my.blog.pojo.vo.admin.RatioChartData;
 import com.my.blog.pojo.vo.admin.TrendChartData;
+import com.my.blog.pojo.vo.user.UserArticlePageQueryVO;
 
 import java.util.List;
 
@@ -22,20 +26,20 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<RatioChartData> categoryArticleRatio();
 
     /**
-     * 统计7天新增文章数
-     * @param status 文章状态
+     * 分页查询文章
+     * @param page 分页参数
+     * @param articlePageQueryDTO 查询条件
+     * @param articleIds 文章id集合
+     * @return 文章分页结果
      */
-    Long countArticle7Day(Integer status);
+    Page<AdminArticlePageQueryVO> pageQuery(Page<AdminArticlePageQueryVO> page, ArticlePageQueryDTO articlePageQueryDTO, List<Long> articleIds);
 
     /**
-     * 统计文章状态
-     * @return 文章状态
+     * 分页查询用户文章
+     * @param page 分页参数
+     * @param userArticlePageQueryDTO 查询条件
+     * @param articleIds 文章id集合
+     * @return 用户文章分页结果
      */
-    List<RatioChartData> countGroupByStatus();
-
-    /**
-     * 获取文章活跃数据
-     * @return 文章活跃数据
-     */
-    List<CalendarChartData> countThisYearAddArticleActive();
+    Page<UserArticlePageQueryVO> userPageQuery(Page<UserArticlePageQueryVO> page, UserArticlePageQueryDTO userArticlePageQueryDTO, List<Long> articleIds);
 }

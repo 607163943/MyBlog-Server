@@ -42,11 +42,18 @@ public class ArticleController {
         return Result.success(adminCategoryVOS);
     }
 
-    @ApiOperation("根据id查询文章")
-    @GetMapping("/{id}")
-    public Result<AdminArticleVO> getById(@PathVariable Long id) {
-        AdminArticleVO adminArticleVO = articleService.getById(id);
-        return Result.success(adminArticleVO);
+    @ApiOperation("根据待删除标签id统计受影响的文章数量")
+    @GetMapping("/count-affected/{tagId}")
+    public Result<Long> countAffectedByTagId(@PathVariable Long tagId) {
+        Long countAffected = articleService.countAffectedByTagId(tagId);
+        return Result.success(countAffected);
+    }
+
+    @ApiOperation("根据待删除标签id集合统计受影响的文章数量")
+    @GetMapping("/count-affected")
+    public Result<Long> countAffectedByTagIds(@RequestParam List<Long> tagIds) {
+        Long countAffected = articleService.countAffectedByTagIds(tagIds);
+        return Result.success(countAffected);
     }
 
     @ApiOperation("根据id预览文章")
@@ -72,9 +79,16 @@ public class ArticleController {
 
     @ApiOperation("根据id修改文章状态")
     @PatchMapping("/{id}/status/{status}")
-    public Result<Object> updateStatus(@PathVariable Long id,@PathVariable Integer status) {
-        articleService.updateStatus(id,status);
+    public Result<Object> updateStatus(@PathVariable Long id, @PathVariable Integer status) {
+        articleService.updateStatus(id, status);
         return Result.success();
+    }
+
+    @ApiOperation("根据id查询文章")
+    @GetMapping("/{id}")
+    public Result<AdminArticleVO> getById(@PathVariable Long id) {
+        AdminArticleVO adminArticleVO = articleService.getById(id);
+        return Result.success(adminArticleVO);
     }
 
     @ApiOperation("根据id删除文章")

@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
-import com.my.blog.common.constants.TagStatus;
 import com.my.blog.common.enums.ExceptionEnums;
 import com.my.blog.common.exception.admin.AdminTagException;
 import com.my.blog.common.result.PageResult;
@@ -55,9 +54,6 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
                 .like(StrUtil.isNotEmpty(adminTagPageQueryDTO.getName()),
                         Tag::getName,
                         adminTagPageQueryDTO.getName())
-                .eq(adminTagPageQueryDTO.getStatus() != null,
-                        Tag::getStatus,
-                        adminTagPageQueryDTO.getStatus())
                 .page(page);
 
         // 构建VO数据
@@ -108,28 +104,6 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
     }
 
     /**
-     * 修改标签状态
-     *
-     * @param id 标签id
-     */
-    @Transactional
-    @Override
-    public void updateStatus(Long id) {
-        Tag tag = getById(id);
-        tag.setStatus(tag.getStatus() == 0 ? 1 : 0);
-
-        // 删除禁用标签的文章标签关联数据
-        if (tag.getStatus().equals(TagStatus.DISABLE)) {
-            Db.lambdaUpdate(ArticleTag.class)
-                    .eq(ArticleTag::getTagId, id)
-                    .remove();
-        }
-
-        // 保证事务
-        tagService.updateById(tag);
-    }
-
-    /**
      * 删除标签
      *
      * @param id 标签id
@@ -166,5 +140,15 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
 
         // 批量删除标签数据
         tagService.removeBatchByIds(ids);
+    }
+
+    /**
+     * 根据文章id查询标签集合
+     * @param articleId 文章id
+     * @return 标签集合
+     */
+    @Override
+    public List<AdminTagPageQueryVO> pageQueryTag(Long articleId) {
+        return baseMapper.pageQueryTag(articleId);
     }
 }
