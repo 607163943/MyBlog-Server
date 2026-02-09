@@ -17,8 +17,6 @@ public class AdminTagVO {
     private Long id;
     @ApiModelProperty("标签名称")
     private String name;
-    @ApiModelProperty("标签状态")
-    private Integer status;
     @ApiModelProperty("创建时间")
     private LocalDateTime createTime;
     @ApiModelProperty("修改时间")

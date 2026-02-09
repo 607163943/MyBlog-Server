@@ -1,7 +1,6 @@
 package com.my.blog.server.controller.admin;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.my.blog.common.constants.TagStatus;
 import com.my.blog.common.result.PageResult;
 import com.my.blog.common.result.Result;
 import com.my.blog.pojo.dto.admin.AdminTagDTO;
@@ -40,7 +39,6 @@ public class TagController {
     @GetMapping("/all/active")
     public Result<List<AdminTagVO>> tagAll() {
         List<Tag> dictList = tagService.lambdaQuery()
-                .eq(Tag::getStatus, TagStatus.ENABLE)
                 .list();
         List<AdminTagVO> adminTagVOS = BeanUtil.copyToList(dictList, AdminTagVO.class);
         return Result.success(adminTagVOS);
@@ -65,13 +63,6 @@ public class TagController {
     @PutMapping
     public Result<Object> updateDict(@Validated({Default.class, UpdateValidGroup.class}) @RequestBody AdminTagDTO adminTagDTO) {
         tagService.updateTag(adminTagDTO);
-        return Result.success();
-    }
-
-    @ApiOperation("根据id修改标签状态")
-    @PatchMapping("/{id}/status")
-    public Result<Object> updateStatus(@PathVariable Long id) {
-        tagService.updateStatus(id);
         return Result.success();
     }
 

@@ -16,8 +16,6 @@ public class Tag {
     private Long id;
     // 标签名
     private String name;
-    // 状态 0启用 1禁用
-    private Integer status;
     // 创建时间
     private LocalDateTime createTime;
     // 修改时间

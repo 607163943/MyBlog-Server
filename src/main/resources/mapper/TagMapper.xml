@@ -10,4 +10,12 @@
           and tag.status = 0
         group by tag.id
     </select>
+    <select id="pageQueryTag" resultType="com.my.blog.pojo.vo.admin.AdminTagPageQueryVO"
+            parameterType="java.lang.Long">
+        select tag.id, tag.name, tag.status
+        from tb_tag tag
+                 join tb_article_tag article_tag on tag.id = article_tag.tag_id
+                 join tb_article article on article_tag.article_id = article.id
+        where article.id = #{articleId}
+    </select>
 </mapper>

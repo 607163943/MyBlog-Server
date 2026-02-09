@@ -1,5 +1,6 @@
 package com.my.blog.common.utils;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.my.blog.pojo.dto.PageQueryDTO;
 import org.springframework.stereotype.Component;
 
@@ -19,5 +20,16 @@ public class PageQueryUtils {
         if(pageSize==null||pageSize<1) {
             pageQueryDTO.setPageSize(10L);
         }
+    }
+
+    public <T> Page<T> createPage(PageQueryDTO pageQueryDTO,Class<T> classz) {
+        // 参数校验和初始化
+        checkAndInitPageQuery(pageQueryDTO);
+        // 构建分页条件
+        Page<T> page = new Page<>();
+        page.setCurrent(pageQueryDTO.getPageNum());
+        page.setSize(pageQueryDTO.getPageSize());
+
+        return page;
     }
 }
