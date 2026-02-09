@@ -1,0 +1,15 @@
+# mysql
+mysql:
+  host: 192.168.150.101
+  port: 3306
+  database: my_blog_db
+  username: root
+  password: 123456
+
+# 阿里云OSS
+ali-yun-oss:
+  access-key: ${ALI_YUN_OSS_ACCESS_KEY}
+  secret-key: ${ALI_YUN_OSS_SECRET_KEY}
+  end-point: oss-cn-beijing.aliyuncs.com
+  bucket-name: ${ALI_YUN_OSS_BUCKET_NAME}
+  domain: https://${ali-yun-oss.bucket-name}.oss-cn-beijing.aliyuncs.com/

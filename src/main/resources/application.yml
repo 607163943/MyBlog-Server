@@ -8,11 +8,6 @@ spring:
     # 激活环境
     active: dev
 
-  # redis缓存
-  redis:
-    host: ${redis.host}
-    port: ${redis.port}
-    database: ${redis.database}
   # 数据源
   datasource:
     name: myblog

@@ -6,6 +6,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.my.blog.common.enums.ExceptionEnums;
 import com.my.blog.common.exception.admin.AdminUserException;
 import com.my.blog.common.utils.JWTUtils;
@@ -13,29 +14,30 @@ import com.my.blog.pojo.dto.admin.UserInfoDTO;
 import com.my.blog.pojo.dto.admin.UserLoginDTO;
 import com.my.blog.pojo.dto.admin.UserPasswordDTO;
 import com.my.blog.pojo.po.User;
-import com.my.blog.pojo.vo.admin.CaptchaVO;
 import com.my.blog.pojo.vo.UserInfoVO;
+import com.my.blog.pojo.vo.admin.CaptchaVO;
 import com.my.blog.pojo.vo.admin.UserLoginVO;
 import com.my.blog.server.mapper.UserMapper;
 import com.my.blog.server.service.admin.IUserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     @Resource
     private JWTUtils jwtUtils;
 
-    @Resource
-    private RedisTemplate<String, Object> redisTemplate;
+    private final Cache<String,String> tokenCache;
+
+    private final Cache<String,String> captchaCache;
 
     /**
      * 用户登录
@@ -73,7 +75,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         updateById(user);
 
         // 令牌存入Redis 1天过期
-        redisTemplate.opsForValue().set("user:token:" + user.getId(), token, 1, TimeUnit.DAYS);
+        tokenCache.put("user:token:" + user.getId(), token);
 
         return UserLoginVO.builder()
                 .token(token)
@@ -88,20 +90,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
      */
     private void validateCaptchaCode(String captchaCode,String captchaKey) {
         // 验证码校验
-        Object captchaCodeObj = redisTemplate.opsForValue().get("user:captcha:" + captchaKey);
-        if (captchaCodeObj == null) {
+        String cacheCaptchaCode = captchaCache.getIfPresent("user:captcha:" + captchaKey);
+        if (cacheCaptchaCode == null) {
             // 验证码过期
             throw new AdminUserException(ExceptionEnums.ADMIN_USER_CAPTCHA_EXPIRED);
         }
 
-        String redisCaptchaCode = captchaCodeObj.toString();
         // 忽略大小写
-        if (!captchaCode.equalsIgnoreCase(redisCaptchaCode)) {
+        if (!captchaCode.equalsIgnoreCase(cacheCaptchaCode)) {
             // 验证码错误
             throw new AdminUserException(ExceptionEnums.ADMIN_USER_CAPTCHA_CODE_ERROR);
         }
         // 清除验证码缓存
-        redisTemplate.delete("user:captcha:" + captchaKey);
+        captchaCache.invalidate("user:captcha:" + captchaKey);
     }
 
     /**
@@ -118,7 +119,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 验证码存入Redis
         // 用UUID作为唯一key
         String uuid = IdUtil.simpleUUID();
-        redisTemplate.opsForValue().set("user:captcha:" + uuid, shearCaptcha.getCode(), 60, TimeUnit.SECONDS);
+        captchaCache.put("user:captcha:" + uuid, shearCaptcha.getCode());
 
         return CaptchaVO.builder()
                 .imageBase64(imageBase64)
@@ -135,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = (User) SecurityUtils.getSubject().getPrincipal();
 
         // 清除缓存中的token
-        redisTemplate.opsForValue().getAndDelete("user:token:" + user.getId());
+        tokenCache.invalidate("user:token:" + user.getId());
 
         log.info("用户{},id:{}，登出成功！", user.getUsername(), user.getId());
     }
@@ -202,6 +203,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         log.info("用户{},id:{}，修改密码成功！", user.getUsername(), user.getId());
 
         // 清除redis token缓存
-        redisTemplate.delete("user:token:" + user.getId());
+        tokenCache.invalidate("user:token:" + user.getId());
     }
 }

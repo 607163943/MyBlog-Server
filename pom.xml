@@ -101,6 +101,11 @@
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.16.1</version>
         </dependency>
+        <!-- Caffeine -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

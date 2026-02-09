@@ -1,6 +1,7 @@
 package com.my.blog.server.security;
 
 import com.baomidou.mybatisplus.extension.toolkit.Db;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.my.blog.common.enums.ExceptionEnums;
 import com.my.blog.common.exception.admin.AdminUserLoginException;
 import com.my.blog.common.utils.JWTUtils;
@@ -10,7 +11,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.realm.AuthenticatingRealm;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -21,7 +21,7 @@ public class LoginRealm extends AuthenticatingRealm {
     private JWTUtils jwtUtils;
 
     @Resource
-    private RedisTemplate<String,Object> redisTemplate;
+    private Cache<String,String> tokenCache;
     @Override
     public boolean supports(AuthenticationToken token) {
         // 只处理自定义认证令牌
@@ -41,12 +41,11 @@ public class LoginRealm extends AuthenticatingRealm {
         }
 
         // redis令牌再校验
-        Object redisTokenObj = redisTemplate.opsForValue().get("user:token:" + userId);
-        if(redisTokenObj==null) {
+        String cacheToken = tokenCache.getIfPresent("user:token:" + userId);
+        if(cacheToken==null) {
             throw new AdminUserLoginException(ExceptionEnums.ADMIN_USER_LOGIN_TIMEOUT);
         }
-        String redisToken = (String) redisTokenObj;
-        if(!redisToken.equals(token)) {
+        if(!cacheToken.equals(token)) {
             throw new AdminUserLoginException(ExceptionEnums.ADMIN_USER_LOGIN_TIMEOUT);
         }
 
