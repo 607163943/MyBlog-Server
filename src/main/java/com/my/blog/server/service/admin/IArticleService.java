@@ -74,4 +74,18 @@ public interface IArticleService extends IService<Article> {
      * @param ids 文章id集合
      */
     void deleteByIds(List<Long> ids);
+
+    /**
+     * 根据待删除标签id统计受影响的文章数量
+     * @param tagId 标签id
+     * @return 影响文章数量
+     */
+    Long countAffectedByTagId(Long tagId);
+
+    /**
+     * 根据待删除标签id集合统计受影响的文章数量
+     * @param tagIds 标签id集合
+     * @return 影响文章数量
+     */
+    Long countAffectedByTagIds(List<Long> tagIds);
 }

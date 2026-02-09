@@ -397,4 +397,34 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         articleService.removeBatchByIds(ids);
     }
+
+    /**
+     * 根据待删除标签id集合统计受影响的文章数量
+     *
+     * @param tagId 标签id
+     * @return 影响文章数量
+     */
+    @Override
+    public Long countAffectedByTagId(Long tagId) {
+        return articleTagService.lambdaQuery()
+                .eq(ArticleTag::getTagId, tagId)
+                .count();
+    }
+
+    /**
+     * 根据待删除标签id集合统计受影响的文章数量
+     *
+     * @param tagIds 标签id集合
+     * @return 影响文章数量
+     */
+    @Override
+    public Long countAffectedByTagIds(List<Long> tagIds) {
+        Long countAffected = 0L;
+        if (CollUtil.isNotEmpty(tagIds)) {
+            countAffected = articleTagService.lambdaQuery()
+                    .in(ArticleTag::getTagId, tagIds)
+                    .count();
+        }
+        return countAffected;
+    }
 }
